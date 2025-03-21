@@ -3,12 +3,13 @@ from jose import JWTError, jwt
 from passlib.context import CryptContext
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
+import os
 
 from .models import TokenData, UserInDB
 from .database import get_user_by_email
 
 # JWT configuration
-SECRET_KEY = "YOUR_SECRET_KEY_CHANGE_THIS_IN_PRODUCTION"
+SECRET_KEY = os.environ.get("SECRET_KEY", "YOUR_SECRET_KEY_CHANGE_THIS_IN_PRODUCTION")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 

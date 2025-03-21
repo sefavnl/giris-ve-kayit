@@ -1,8 +1,9 @@
 from pymongo import MongoClient
 from bson.objectid import ObjectId
+import os
 
-# MongoDB connection string
-MONGO_URI = "mongodb+srv://nozkanca7:sgshcoNN21@cluster0.ipznc.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
+# MongoDB connection string from environment variable
+MONGO_URI = os.environ.get("MONGO_URI", "mongodb+srv://nozkanca7:sgshcoNN21@cluster0.ipznc.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
 
 # Create a MongoDB client
 client = MongoClient(MONGO_URI)
