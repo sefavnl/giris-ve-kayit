@@ -10,6 +10,7 @@ origins = [
     "http://localhost:5173",  # Vite React frontend
     "http://127.0.0.1:3000",
     "http://127.0.0.1:5173",
+    "https://giris-ve-kayit-1.onrender.com",  # Deployed frontend
 ]
 
 app.add_middleware(

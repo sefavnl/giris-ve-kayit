@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:8000/api';
+const API_URL = 'https://giris-ve-kayit.onrender.com/api';
 
 // Create an axios instance
 const api = axios.create({
