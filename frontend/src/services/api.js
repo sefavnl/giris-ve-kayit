@@ -67,6 +67,29 @@ export const authService = {
   // Check if user is logged in
   isLoggedIn: () => {
     return !!localStorage.getItem('token');
+  },
+  
+  // Request password reset
+  requestPasswordReset: async (email) => {
+    try {
+      const response = await api.post('/forgot-password', { email });
+      return response.data;
+    } catch (error) {
+      throw error.response ? error.response.data : error;
+    }
+  },
+  
+  // Reset password with token
+  resetPassword: async (token, newPassword) => {
+    try {
+      const response = await api.post('/reset-password', { 
+        token, 
+        new_password: newPassword 
+      });
+      return response.data;
+    } catch (error) {
+      throw error.response ? error.response.data : error;
+    }
   }
 };
 

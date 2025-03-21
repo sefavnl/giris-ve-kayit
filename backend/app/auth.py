@@ -4,9 +4,11 @@ from passlib.context import CryptContext
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 import os
+import secrets
+import string
 
 from .models import TokenData, UserInDB
-from .database import get_user_by_email
+from .database import get_user_by_email, store_password_reset_token, verify_password_reset_token, update_user, delete_password_reset_token
 
 # JWT configuration
 SECRET_KEY = os.environ.get("SECRET_KEY", "YOUR_SECRET_KEY_CHANGE_THIS_IN_PRODUCTION")
@@ -61,4 +63,45 @@ def get_current_user(token: str = Depends(oauth2_scheme)):
     user = get_user_by_email(email=token_data.email)
     if user is None:
         raise credentials_exception
-    return user 
+    return user
+
+# Password reset utilities
+def generate_password_reset_token(length=32):
+    """Generate a secure random token for password reset"""
+    alphabet = string.ascii_letters + string.digits
+    return ''.join(secrets.choice(alphabet) for _ in range(length))
+
+def create_password_reset(email: str):
+    """Create a password reset token and store it"""
+    # Check if user exists
+    user = get_user_by_email(email)
+    if not user:
+        # Don't reveal if email exists or not for security
+        return True
+        
+    # Generate token
+    token = generate_password_reset_token()
+    
+    # Store token
+    store_password_reset_token(email, token)
+    
+    return token
+
+def reset_password(token: str, new_password: str):
+    """Reset user password using the reset token"""
+    # Verify token and get email
+    email = verify_password_reset_token(token)
+    if not email:
+        return False
+        
+    # Hash the new password
+    hashed_password = get_password_hash(new_password)
+    
+    # Update user password
+    success = update_user(email, {"hashed_password": hashed_password})
+    
+    if success:
+        # Delete the used token
+        delete_password_reset_token(token)
+        
+    return success 

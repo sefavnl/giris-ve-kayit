@@ -2,13 +2,15 @@ from datetime import timedelta
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 
-from .models import UserCreate, UserResponse, Token, UserLogin
+from .models import UserCreate, Token, PasswordResetRequest, PasswordReset, UserResponse, UserLogin
 from .auth import (
     authenticate_user, 
     create_access_token, 
     get_current_user, 
     get_password_hash,
-    ACCESS_TOKEN_EXPIRE_MINUTES
+    ACCESS_TOKEN_EXPIRE_MINUTES,
+    create_password_reset,
+    reset_password
 )
 from .database import add_user, get_user_by_email
 
@@ -85,4 +87,27 @@ def read_users_me(current_user = Depends(get_current_user)):
         "email": current_user["email"],
         "first_name": current_user["first_name"],
         "last_name": current_user["last_name"]
-    } 
+    }
+
+# Password Reset Endpoints
+@router.post("/forgot-password", status_code=status.HTTP_200_OK)
+def forgot_password(request: PasswordResetRequest):
+    """Request a password reset email"""
+    token = create_password_reset(request.email)
+    
+    # In a real-world app, you would send an email with a link like:
+    # https://yourfrontend.com/reset-password?token={token}
+    
+    # For demo purposes, just return the token
+    return {"message": "If your email is registered, you will receive a password reset link.", "token": token}
+
+@router.post("/reset-password", status_code=status.HTTP_200_OK)
+def process_password_reset(reset_data: PasswordReset):
+    """Process a password reset request with token"""
+    if not reset_password(reset_data.token, reset_data.new_password):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid or expired password reset token"
+        )
+    
+    return {"message": "Password has been reset successfully"} 
